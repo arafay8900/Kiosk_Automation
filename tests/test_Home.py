@@ -52,7 +52,7 @@ def test_homepage(driver, logger):
     home.click_phone_next()
 
     home.chose_profile()
-    time.sleep(30)
+    time.sleep(25)
 
     # Verify Chose Host URL
     if driver.current_url == home.chose_host_url():
@@ -63,4 +63,4 @@ def test_homepage(driver, logger):
 
     home.click_chose_host()
 
-    time.sleep(30)
+    time.sleep(10)
