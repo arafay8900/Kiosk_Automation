@@ -11,7 +11,8 @@ Remove-Item -Recurse -Force reports/screenshots -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force reports/videos -ErrorAction SilentlyContinue
 
 # Run tests and generate Allure report
-pytest --alluredir=reports/allure tests/
+Write-Host "Running tests on multiple browsers: Chrome, Firefox, and Edge..."
+pytest --alluredir=reports/allure tests/ -v
 if ($LASTEXITCODE -eq 0) {
     allure generate reports/allure --clean
     # Open the report in browser

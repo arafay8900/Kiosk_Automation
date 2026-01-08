@@ -1,0 +1,11 @@
+{
+    "yaml.schemas": {
+        "https://www.artillery.io/schema.json": []
+    },
+    "CodeGPT.apiKey": "OpenAI",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

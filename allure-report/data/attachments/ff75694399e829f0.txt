@@ -1,5 +1,0 @@
-✅ HomePage is Loaded: https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/home
-✅ Visitor Types are Loaded: https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/visitor-type
-✅ Enter Phone is Loaded: https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/num-people
-✅ Visitor info screen is Loaded: https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/visitor-info
-✅ Profile is Selected and we are on Chose Host Screen: https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/choose-host

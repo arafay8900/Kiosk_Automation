@@ -3,19 +3,120 @@ import os
 import base64
 import pytest
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from pytest_html import extras
+import allure
+import cv2
+import mss
+import numpy as np
+import threading
+import time
+import logging
+
+# Suppress urllib3 warnings
+logging.getLogger("urllib3").setLevel(logging.ERROR)
+
+# ------------------------- 
+# Pytest Fixture: Browser Parameter
+# -------------------------
+@pytest.fixture(params=["chrome", "firefox", "edge"])
+def browser(request):
+    """Fixture to parameterize tests across different browsers."""
+    return request.param
 
 # -------------------------
 # Pytest Fixture: WebDriver
 # -------------------------
 @pytest.fixture
-def driver():
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+def driver(browser):
+    """Fixture to create WebDriver instance based on browser parameter."""
+    if browser == "chrome":
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+    elif browser == "firefox":
+        driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
+    elif browser == "edge":
+        # Try to use local Edge WebDriver first, fallback to auto-download
+        edge_driver_path = "drivers/msedgedriver.exe"
+        if os.path.exists(edge_driver_path):
+            service = EdgeService(executable_path=edge_driver_path)
+        else:
+            try:
+                service = EdgeService(EdgeChromiumDriverManager().install())
+            except Exception as e:
+                print(f"Edge WebDriver auto-download failed: {e}")
+                print("Please download Edge WebDriver manually from:")
+                print("https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/")
+                print(f"Extract msedgedriver.exe to: {os.path.abspath(edge_driver_path)}")
+                raise e
+        driver = webdriver.Edge(service=service)
+
     driver.maximize_window()
     yield driver
     driver.quit()
+
+# ------------------------- 
+# Screen Recorder Class
+# -------------------------
+class ScreenRecorder:
+    """Class to record screen during test execution."""
+
+    def __init__(self, driver):
+        """Initialize the recorder with the WebDriver instance."""
+        self.driver = driver
+        self.frames = []
+        self.recording = False
+        self.thread = None
+
+    def start(self):
+        """Start recording in a separate thread."""
+        self.recording = True
+        self.thread = threading.Thread(target=self._record)
+        self.thread.start()
+
+    def _record(self):
+        """Internal method to capture frames from the browser window."""
+        with mss.mss() as sct:
+            pos = self.driver.get_window_position()
+            size = self.driver.get_window_size()
+            bbox = {'left': pos['x'], 'top': pos['y'], 'width': size['width'], 'height': size['height']}
+            while self.recording:
+                img = sct.grab(bbox)
+                frame = cv2.cvtColor(np.array(img), cv2.COLOR_BGRA2BGR)
+                self.frames.append(frame)
+                time.sleep(0.2)  # 5 fps
+
+    def stop(self):
+        """Stop recording and return captured frames."""
+        self.recording = False
+        if self.thread:
+            self.thread.join()
+        return self.frames
+
+# ------------------------- 
+# Pytest Fixture: Screen Recorder
+# -------------------------
+@pytest.fixture
+def screen_recorder(request, driver):
+    """Fixture to record screen during test and attach video to Allure."""
+    recorder = ScreenRecorder(driver)
+    recorder.start()
+    yield recorder
+    frames = recorder.stop()
+    if frames:
+        height, width, _ = frames[0].shape
+        video_path = f"reports/videos/{request.node.name}.mp4"
+        os.makedirs(os.path.dirname(video_path), exist_ok=True)
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(video_path, fourcc, 5.0, (width, height))
+        for frame in frames:
+            out.write(frame)
+        out.release()
+        allure.attach.file(video_path, name="Test Video", attachment_type=allure.attachment_type.MP4)
 
 # -------------------------
 # Step Logs Storage
@@ -27,6 +128,7 @@ step_logs = {}
 # -------------------------
 @pytest.fixture
 def logger(request, driver):
+    """Fixture to log steps with screenshots for HTML and Allure reports."""
     test_name = request.node.name
     if test_name not in step_logs:
         step_logs[test_name] = []
@@ -44,6 +146,9 @@ def logger(request, driver):
         with open(screenshot_path, "rb") as f:
             img_base64 = base64.b64encode(f.read()).decode("utf-8")
 
+        # Attach to Allure
+        allure.attach.file(screenshot_path, name=f"Step {len(step_logs[test_name])+1}: {message}", attachment_type=allure.attachment_type.PNG)
+
         # Add log entry
         step_logs[test_name].append({
             "message": message,
@@ -52,8 +157,10 @@ def logger(request, driver):
 
     return log
 
+    return log
+
 # -------------------------
-# Pytest Hook: Attach Logs & Screenshots to HTML Report
+# Pytest Hook: Attach Logs, Screenshots, and Video Links to Reports
 # -------------------------
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -62,10 +169,22 @@ def pytest_runtest_makereport(item, call):
 
     if rep.when == "call":
         test_name = item.name
-        extras_list = getattr(rep, "extras", [])  # <-- updated to 'extras'
+        extras_list = getattr(rep, "extras", [])
 
+        # Attach step logs and screenshots to HTML report
         for step in step_logs.get(test_name, []):
             extras_list.append(extras.text(step["message"]))
             extras_list.append(extras.image(step["screenshot_base64"]))
 
-        rep.extras = extras_list  # <-- updated to 'extras'
+        # Add video link to HTML report
+        video_path = f"videos/{test_name}.mp4"
+        if os.path.exists(f"reports/{video_path}"):
+            extras_list.append(extras.html(f'<a href="{video_path}" target="_blank">Download Test Video</a>'))
+
+        rep.extras = extras_list
+
+        # Attach screenshot on failure to Allure
+        if rep.failed:
+            driver = item.funcargs.get('driver')
+            if driver:
+                allure.attach(driver.get_screenshot_as_png(), name="Screenshot on failure", attachment_type=allure.attachment_type.PNG)

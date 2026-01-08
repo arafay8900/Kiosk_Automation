@@ -1,66 +1,209 @@
-import time
-
 from pages.Home_page import HomePage
 
-def test_homepage(driver, logger):
+def test_homepage(driver, browser, logger, screen_recorder):
+    """Test the complete visitor check-in flow from home to upload on {browser}."""
+    home = HomePage(driver, logger)
     home = HomePage(driver, logger)
 
+    # Open the home page
     home.open()
-    time.sleep(2)
+    logger("Opened home page")
 
-    driver.execute_cdp_cmd('Network.clearBrowserCache', {})
-    driver.execute_cdp_cmd('Network.clearBrowserCookies', {})
+    # Wait for homepage to load
+    home.wait.until(lambda d: d.current_url == home.home_url())
 
-    # Verify Homepage URL
-    if driver.current_url == home.home_url():
-        print("✅ HomePage is Loaded:", driver.current_url)
+    # Clear browser cache and cookies (browser-specific handling)
+    if browser == "chrome":
+        # Chrome supports CDP commands
+        driver.execute_cdp_cmd('Network.clearBrowserCache', {})
+        driver.execute_cdp_cmd('Network.clearBrowserCookies', {})
     else:
-        print("❌ HomePage is Not Loaded:", driver.current_url)
-        assert False, f"URL mismatch! Expected: {home.home_url()}, Found: {driver.current_url}"
+        # For other browsers, just clear cookies (cache clearing is more complex)
+        driver.delete_all_cookies()
 
+    logger("Cleared browser cache and cookies")
+
+    # Assert homepage URL
+    assert driver.current_url == home.home_url(), f"Expected {home.home_url()}, got {driver.current_url()}"
+    logger("Asserted homepage URL")
+
+    # Click check-in button
     home.click_check_in()
-    time.sleep(2)
+    logger("Clicked check-in button")
 
-    # Verify Visitor Type URL
-    if driver.current_url == home.visitor_type_url():
-        print("✅ Visitor Types are Loaded:", driver.current_url)
-    else:
-        print("❌ Visitor Types are not Loaded:", driver.current_url)
-        assert False, f"URL mismatch! Expected: {home.visitor_type_url()}, Found: {driver.current_url}"
+    # Wait for visitor type page
+    home.wait.until(lambda d: d.current_url == home.visitor_type_url())
 
+    # Assert visitor type URL
+    assert driver.current_url == home.visitor_type_url(), f"Expected {home.visitor_type_url()}, got {driver.current_url()}"
+    logger("Asserted visitor type URL")
+
+    # Choose workflow
     home.click_chose_workflow()
-    time.sleep(2)
+    logger("Chose workflow")
 
-    # Verify Multiparty URL
-    if driver.current_url == home.num_people_url():
-        print("✅ Enter Phone is Loaded:", driver.current_url)
-    else:
-        print("❌ Enter Phone is not Loaded:", driver.current_url)
-        assert False, f"URL mismatch! Expected: {home.num_people_url()}, Found: {driver.current_url}"
+    # Wait for num people page
+    home.wait.until(lambda d: d.current_url == home.num_people_url())
 
+    # Assert num people URL
+    assert driver.current_url == home.num_people_url(), f"Expected {home.num_people_url()}, got {driver.current_url()}"
+    logger("Asserted num people URL")
+
+    # Click next for multiparty
     home.click_next_multiparty()
-    time.sleep(2)
+    logger("Clicked next for multiparty")
 
-    # Verify Phone Number URL
-    if driver.current_url == home.visitor_info_url():
-        print("✅ Visitor info screen is Loaded:", driver.current_url)
-    else:
-        print("❌ Visitor info screen is not Loaded:", driver.current_url)
-        assert False, f"URL mismatch! Expected: {home.visitor_info_url()}, Found: {driver.current_url}"
+    # Wait for visitor info page
+    home.wait.until(lambda d: d.current_url == home.visitor_info_url())
 
+    # Assert visitor info URL
+    assert driver.current_url == home.visitor_info_url(), f"Expected {home.visitor_info_url()}, got {driver.current_url()}"
+    logger("Asserted visitor info URL")
+
+    # Enter phone number and proceed
     home.phone_input()
     home.click_phone_next()
+    logger("Entered phone number and proceeded")
 
+    # Choose profile
     home.chose_profile()
-    time.sleep(30)
+    logger("Chose profile")
 
-    # Verify Chose Host URL
-    if driver.current_url == home.chose_host_url():
-        print("✅ Profile is Selected and we are on Chose Host Screen:", driver.current_url)
-    else:
-        print("❌ Profile is not Select:", driver.current_url)
-        assert False, f"URL mismatch! Expected: {home.chose_host_url()}, Found: {driver.current_url}"
+    # Wait for choose host page
+    home.wait.until(lambda d: d.current_url == home.chose_host_url())
 
+    # Assert choose host URL
+    assert driver.current_url == home.chose_host_url(), f"Expected {home.chose_host_url()}, got {driver.current_url()}"
+    logger("Asserted choose host URL")
+
+    # Click choose host
     home.click_chose_host()
+    logger("Clicked choose host")
 
-    time.sleep(30)
+    # Upload file
+    home.upload_file()
+    logger("Uploaded file")
+
+    # Click upload next
+    home.click_upload_next()
+    logger("Clicked upload next")
+
+    # click dox next
+    home.click_dox_next()
+    logger("Clicked dox next")
+
+    # click dox next
+    home.click_dox_next()
+    logger("Clicked dox next")
+
+    # click pptx next2
+    home.click_pptx_next2()
+    logger("Clicked agreement next2")
+
+    # click pptx next2
+    home.click_pptx_next2()
+    logger("Clicked agreement next2")
+
+    # click pptx next2
+    home.click_pptx_next2()
+    logger("Clicked agreement next2")
+
+     # click pptx next2
+    home.click_pptx_next2()
+    logger("Clicked agreement next2")
+
+    # click pptx next2
+    home.click_pptx_next2()
+    logger("Clicked agreement next2")
+
+     # click image1
+    home.click_pptx_next2()
+    logger("Clicked agreement next2")
+
+     # click image2
+    home.click_pptx_next2()
+    logger("Clicked agreement next2")
+
+     # click image3
+    home.click_pptx_next2()
+    logger("Clicked agreement next2")
+
+    # click external next
+    home.click_upload_next()
+    logger("Clicked external next")
+
+    # click external next
+    home.click_upload_next()
+    logger("Clicked external next")
+
+    #click Form option
+    home.click_test_option()    
+    logger("Clicked test option")
+
+    #click close image
+    home.click_close_image()
+    logger("Clicked close image")
+
+    #click Form submit
+    home.click_test_submit()    
+    logger("Clicked test submit")
+
+    #click test option
+    home.click_test_option_without()    
+    logger("Clicked test option")
+
+    #click test submit
+    home.click_test_submit()    
+    logger("Clicked test submit")
+
+     # click Emoti next
+    home.click_upload_next()
+    logger("Clicked external next")
+
+    # click Emoti next
+    home.click_upload_next()
+    logger("Clicked external next")
+
+    #click test option
+    home.click_test_option_without()    
+    logger("Clicked test option")
+
+    #click test submit
+    home.click_test_submit()    
+    logger("Clicked test submit")
+
+    #click Content next
+    home.click_test_submit()    
+    logger("Clicked content next")
+
+    #click content next
+    home.click_content_next()
+    logger("Clicked content next")
+
+    #click content next
+    home.click_content_next()
+    logger("Clicked content next")
+
+    #click content next
+    home.click_content_next()
+    logger("Clicked content next")
+
+    #click content next
+    home.click_content_next()
+    logger("Clicked content next")
+
+    #click content next
+    home.click_content_next()
+    logger("Clicked content next")
+
+    #click content next
+    home.click_content_next()
+    logger("Clicked content next")
+
+    #click Acknowledgment option
+    home.click_test_option_without()    
+    logger("Clicked acknowledgment option")
+
+    #click Acknowledgement submit
+    home.click_test_submit()    
+    logger("Clicked acknowledgment submit")

@@ -1,1 +1,63 @@
-pytest --html=reports/report.html --self-contained-html -v
+# ===========================================
+# KIOSK AUTOMATION TEST COMMANDS
+# ===========================================
+
+# ULTRA-SHORT COMMANDS (PowerShell) - AUTO REPORT GENERATION
+# ----------------------------------------------------------
+.\test.ps1 all      # Run ALL browsers + auto cleanup + auto generate/serve report
+.\test.ps1 chrome   # Chrome only + auto cleanup + auto generate/serve report
+.\test.ps1 firefox  # Firefox only + auto cleanup + auto generate/serve report
+.\test.ps1 edge     # Edge only + auto cleanup + auto generate/serve report
+
+# PYTHON COMMANDS - AUTO REPORT GENERATION
+# -----------------------------------------
+python test_runner.py all      # Run ALL browsers + auto cleanup + auto generate/serve report
+python test_runner.py chrome    # Run Chrome only + auto cleanup + auto generate/serve report
+python test_runner.py firefox   # Run Firefox only + auto cleanup + auto generate/serve report
+python test_runner.py edge      # Run Edge only + auto cleanup + auto generate/serve report
+
+# MANUAL COMMANDS (if needed)
+# ---------------------------
+pytest tests/test_Home.py::test_homepage --collect-only  # Show test collection
+pytest --html=reports/report.html --self-contained-html -v  # HTML report
+
+# MANUAL REPORTING COMMANDS
+# -------------------------
+# Step 1: Generate Allure report
+allure generate reports/allure --clean
+
+# Step 2: Serve Allure report (opens browser automatically)
+allure serve reports/allure
+
+# Combined command (generate then serve - will wait for Ctrl+C):
+# allure generate reports/allure --clean && allure serve reports/allure
+
+# CLEANUP COMMANDS (runs automatically before each test run)
+# -----------------------------------------------------------
+# Manual cleanup (if needed):
+# Remove-Item -Recurse -Force reports/allure,allure-report,reports/screenshots,reports/videos -ErrorAction SilentlyContinue
+
+# ===========================================
+# USAGE EXAMPLES
+# ===========================================
+#
+# 1. Test all browsers (shortest) - AUTO CLEANUP + REPORT:
+#    .\test.ps1 all
+#
+# 2. Quick Chrome test - AUTO CLEANUP + REPORT:
+#    .\test.ps1 chrome
+#
+# 3. Python version - AUTO CLEANUP + REPORT:
+#    python test_runner.py all
+#
+# 4. Manual report generation (if needed):
+#    allure generate reports/allure --clean
+#    allure serve reports/allure
+#
+# WHAT HAPPENS AUTOMATICALLY:
+# ---------------------------
+# 🧹 Previous reports are cleaned BEFORE each test run
+# 🧪 Tests execute and generate new Allure results
+# 📊 Allure report is generated after successful tests
+# 🌐 Allure report opens in browser automatically
+# 🔄 Press Ctrl+C in terminal to stop the report server
