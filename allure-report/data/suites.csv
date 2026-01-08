@@ -1,0 +1,2 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Test the complete visitor check-in flow from home to upload on {browser}.","62330","test_homepage[chrome]","tests","2026-01-08","passed","2026-01-08","","test_Home","",""

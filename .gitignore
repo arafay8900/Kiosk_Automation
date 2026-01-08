@@ -14,3 +14,5 @@ reports/
 # Logs & temp
 *.log
 .env
+node_modules/
+allure-report/
