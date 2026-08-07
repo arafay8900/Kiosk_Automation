@@ -70,6 +70,24 @@ pytest --html=reports/report.html --self-contained-html -v
 
 **Note**: Test runners automatically clean reports, run tests, and serve Allure reports.
 
+### Sample Allure Report
+
+**Overview** — pass rate, suite breakdown, environment:
+
+![Allure overview](docs/screenshots/allure-overview.png)
+
+**Suites** — per-step breakdown with attached screenshots for every action:
+
+![Allure suite detail](docs/screenshots/allure-suites.png)
+
+**Graphs** — status, severity, and duration at a glance:
+
+![Allure graphs](docs/screenshots/allure-graphs.png)
+
+**Timeline** — execution timing per test:
+
+![Allure timeline](docs/screenshots/allure-timeline.png)
+
 ## 🔧 Tech Stack
 
 - **Python 3.11+** - Core language
