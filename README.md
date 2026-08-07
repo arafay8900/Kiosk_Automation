@@ -19,7 +19,7 @@ Tests the complete visitor registration workflow across Chrome, Firefox, and Edg
 
 ### Install
 ```bash
-git clone https://github.com/abdul-rafay8900/Kiosk_Automation.git
+git clone https://github.com/arafay8900/Kiosk_Automation.git
 cd Kiosk_Automation
 python -m venv .venv
 .\.venv\Scripts\activate  # Windows
