@@ -8,11 +8,13 @@ __pycache__/
 # PyCharm / IDE
 .idea/
 
-# Reports
+# Reports (generated test output, never commit)
 reports/
+allure-report/
+allure-results/
+*.mp4
 
 # Logs & temp
 *.log
 .env
 node_modules/
-allure-report/
