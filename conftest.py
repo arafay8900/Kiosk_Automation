@@ -40,20 +40,9 @@ def driver(browser):
     elif browser == "firefox":
         driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
     elif browser == "edge":
-        # Try to use local Edge WebDriver first, fallback to auto-download
-        edge_driver_path = "drivers/msedgedriver.exe"
-        if os.path.exists(edge_driver_path):
-            service = EdgeService(executable_path=edge_driver_path)
-        else:
-            try:
-                service = EdgeService(EdgeChromiumDriverManager().install())
-            except Exception as e:
-                print(f"Edge WebDriver auto-download failed: {e}")
-                print("Please download Edge WebDriver manually from:")
-                print("https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/")
-                print(f"Extract msedgedriver.exe to: {os.path.abspath(edge_driver_path)}")
-                raise e
-        driver = webdriver.Edge(service=service)
+        # Auto-download the driver matching the installed Edge version; a
+        # pinned local binary drifts out of sync with Edge's auto-updates.
+        driver = webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()))
 
     driver.maximize_window()
     yield driver

@@ -58,9 +58,9 @@ npm install -g allure
 |---------|-------|--------|
 | Chrome  | Auto | ✅ Ready |
 | Firefox | Auto | ✅ Ready |
-| Edge    | Manual* | ✅ Ready |
+| Edge    | Auto | ✅ Ready |
 
-*Download Edge WebDriver to `drivers/` folder
+All three drivers are auto-downloaded via `webdriver_manager` to match whatever browser version is actually installed, no manual driver files to keep in sync.
 
 ## 📊 Reports
 
@@ -108,10 +108,6 @@ pytest --html=reports/report.html --self-contained-html -v
 See `commands.txt` for complete command reference.
 
 ## 🔧 Troubleshooting
-
-### Edge Issues
-Download WebDriver: https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
-Extract to `drivers/msedgedriver.exe`
 
 ### Virtual Environment
 ```bash

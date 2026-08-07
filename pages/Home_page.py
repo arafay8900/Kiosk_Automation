@@ -1,8 +1,11 @@
+import os
 import time
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class HomePage:
@@ -25,7 +28,7 @@ class HomePage:
     CHOSE_HOST = (
         By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[1]/div/div[3]/div[2]/div[1]/div[1]/div[2]/div[9]")
     UPLOAD_BUTTON = "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div[1]/div[1]/div[1]/button"
-    UPLOAD_FILE_PATH = r"C:\Users\AbdulRafay\Downloads\1380678.jpg"
+    UPLOAD_FILE_PATH = os.path.join(REPO_ROOT, "docs", "sample-upload.jpg")
     UPLOAD_NEXT = (
         By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div[2]/button")
     DOX_NEXT_BUTTON = (
