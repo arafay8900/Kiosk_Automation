@@ -3,6 +3,9 @@ import os
 import base64
 import pytest
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
 from pytest_html import extras
 import allure
 import cv2
@@ -32,14 +35,29 @@ def driver(browser):
     # Selenium Manager (built into Selenium 4.6+) resolves and downloads the
     # driver matching whatever browser version is installed, no separate
     # webdriver-manager dependency or pinned driver binaries to go stale.
+    #
+    # --no-sandbox/--disable-dev-shm-usage: Chromium crashes on launch in CI
+    # containers without them (restricted namespaces, tiny /dev/shm).
+    # --start-maximized instead of a post-launch maximize_window() call:
+    # maximize_window() depends on real window-manager behavior that a bare
+    # Xvfb display doesn't reliably provide.
     if browser == "chrome":
-        driver = webdriver.Chrome()
+        options = ChromeOptions()
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--start-maximized")
+        driver = webdriver.Chrome(options=options)
     elif browser == "firefox":
-        driver = webdriver.Firefox()
+        options = FirefoxOptions()
+        options.add_argument("--width=1920")
+        options.add_argument("--height=1080")
+        driver = webdriver.Firefox(options=options)
     elif browser == "edge":
-        driver = webdriver.Edge()
-
-    driver.maximize_window()
+        options = EdgeOptions()
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--start-maximized")
+        driver = webdriver.Edge(options=options)
     yield driver
     driver.quit()
 

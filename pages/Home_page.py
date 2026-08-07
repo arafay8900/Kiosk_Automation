@@ -1,6 +1,6 @@
 import os
 import time
-from selenium.common import TimeoutException
+from selenium.common import ElementClickInterceptedException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -58,7 +58,19 @@ class HomePage:
             self.logger(message)
 
     def _click(self, locator, message):
-        self.wait.until(EC.element_to_be_clickable(locator)).click()
+        element = self.wait.until(EC.element_to_be_clickable(locator))
+        try:
+            element.click()
+        except ElementClickInterceptedException:
+            # Something (an image, an animating overlay) is momentarily on
+            # top of the target. Scroll it to the center of the viewport and
+            # retry before falling back to a JS-dispatched click.
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+            time.sleep(0.5)
+            try:
+                element.click()
+            except ElementClickInterceptedException:
+                self.driver.execute_script("arguments[0].click();", element)
         self._log(message)
 
     def wait_for_api(self, timeout=100):
