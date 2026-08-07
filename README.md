@@ -12,6 +12,8 @@ Tests the complete visitor registration workflow across Chrome, Firefox, and Edg
 - Automatic screenshots and video recording
 - Comprehensive Allure reporting
 
+**Current coverage**: one end-to-end scenario (`test_homepage`, [tests/test_Home.py](tests/test_Home.py)) covering the full check-in flow, parametrized across Chrome, Firefox, and Edge = 3 total test executions per run. More scenarios can be added under `tests/` following the same page-object pattern.
+
 ## 🚀 Quick Start
 
 ### Install
@@ -21,6 +23,11 @@ cd Kiosk_Automation
 python -m venv .venv
 .\.venv\Scripts\activate  # Windows
 pip install -r requirements.txt
+```
+
+Allure's CLI (`allure generate`/`allure serve`, used for reporting below) is distributed as an npm package rather than a Python one, that's what `package.json`/`package-lock.json` are for. Install it globally so the `allure` command is on PATH:
+```bash
+npm install -g allure
 ```
 
 ### Run Tests
