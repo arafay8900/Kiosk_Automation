@@ -58,6 +58,13 @@ def driver(browser):
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--start-maximized")
         driver = webdriver.Edge(options=options)
+
+    # Fail fast on a hung renderer instead of blocking for minutes: without
+    # these, a stuck page load or execute_script() call can hang well past
+    # any of HomePage's own WebDriverWait timeouts.
+    driver.set_page_load_timeout(60)
+    driver.set_script_timeout(60)
+
     yield driver
     driver.quit()
 
@@ -185,8 +192,15 @@ def pytest_runtest_makereport(item, call):
 
         rep.extras = extras_list
 
-        # Attach screenshot on failure to Allure
+        # Attach screenshot on failure to Allure. A diagnostics step must
+        # never be able to crash the run it's diagnosing, if the browser is
+        # already dead/unresponsive (the likely reason the test just
+        # failed), skip the screenshot instead of raising a second
+        # exception inside pytest's own reporting hook.
         if rep.failed:
             driver = item.funcargs.get('driver')
             if driver:
-                allure.attach(driver.get_screenshot_as_png(), name="Screenshot on failure", attachment_type=allure.attachment_type.PNG)
+                try:
+                    allure.attach(driver.get_screenshot_as_png(), name="Screenshot on failure", attachment_type=allure.attachment_type.PNG)
+                except Exception as e:
+                    print(f"Could not capture failure screenshot: {e}")
