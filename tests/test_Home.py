@@ -1,209 +1,84 @@
 from pages.Home_page import HomePage
 
+
 def test_homepage(driver, browser, logger, screen_recorder):
-    """Test the complete visitor check-in flow from home to upload on {browser}."""
-    home = HomePage(driver, logger)
+    """Test the complete visitor check-in flow from home to acknowledgment on {browser}."""
     home = HomePage(driver, logger)
 
-    # Open the home page
+    def step(action, message):
+        action()
+        logger(message)
+
+    def assert_url(expected_url, message):
+        home.wait.until(lambda d: d.current_url == expected_url)
+        assert driver.current_url == expected_url, f"Expected {expected_url}, got {driver.current_url}"
+        logger(message)
+
+    # Home page
     home.open()
     logger("Opened home page")
-
-    # Wait for homepage to load
-    home.wait.until(lambda d: d.current_url == home.home_url())
+    assert_url(home.home_url(), "Asserted homepage URL")
 
     # Clear browser cache and cookies (browser-specific handling)
     if browser == "chrome":
-        # Chrome supports CDP commands
         driver.execute_cdp_cmd('Network.clearBrowserCache', {})
         driver.execute_cdp_cmd('Network.clearBrowserCookies', {})
     else:
-        # For other browsers, just clear cookies (cache clearing is more complex)
         driver.delete_all_cookies()
-
     logger("Cleared browser cache and cookies")
 
-    # Assert homepage URL
-    assert driver.current_url == home.home_url(), f"Expected {home.home_url()}, got {driver.current_url()}"
-    logger("Asserted homepage URL")
+    # Check-in -> visitor type -> num people -> visitor info
+    step(home.click_check_in, "Clicked check-in button")
+    assert_url(home.visitor_type_url(), "Asserted visitor type URL")
 
-    # Click check-in button
-    home.click_check_in()
-    logger("Clicked check-in button")
+    step(home.click_chose_workflow, "Chose workflow")
+    assert_url(home.num_people_url(), "Asserted num people URL")
 
-    # Wait for visitor type page
-    home.wait.until(lambda d: d.current_url == home.visitor_type_url())
+    step(home.click_next_multiparty, "Clicked next for multiparty")
+    assert_url(home.visitor_info_url(), "Asserted visitor info URL")
 
-    # Assert visitor type URL
-    assert driver.current_url == home.visitor_type_url(), f"Expected {home.visitor_type_url()}, got {driver.current_url()}"
-    logger("Asserted visitor type URL")
-
-    # Choose workflow
-    home.click_chose_workflow()
-    logger("Chose workflow")
-
-    # Wait for num people page
-    home.wait.until(lambda d: d.current_url == home.num_people_url())
-
-    # Assert num people URL
-    assert driver.current_url == home.num_people_url(), f"Expected {home.num_people_url()}, got {driver.current_url()}"
-    logger("Asserted num people URL")
-
-    # Click next for multiparty
-    home.click_next_multiparty()
-    logger("Clicked next for multiparty")
-
-    # Wait for visitor info page
-    home.wait.until(lambda d: d.current_url == home.visitor_info_url())
-
-    # Assert visitor info URL
-    assert driver.current_url == home.visitor_info_url(), f"Expected {home.visitor_info_url()}, got {driver.current_url()}"
-    logger("Asserted visitor info URL")
-
-    # Enter phone number and proceed
+    # Phone and profile
     home.phone_input()
     home.click_phone_next()
     logger("Entered phone number and proceeded")
 
-    # Choose profile
     home.chose_profile()
     logger("Chose profile")
+    assert_url(home.chose_host_url(), "Asserted choose host URL")
 
-    # Wait for choose host page
-    home.wait.until(lambda d: d.current_url == home.chose_host_url())
+    step(home.click_chose_host, "Clicked choose host")
 
-    # Assert choose host URL
-    assert driver.current_url == home.chose_host_url(), f"Expected {home.chose_host_url()}, got {driver.current_url()}"
-    logger("Asserted choose host URL")
-
-    # Click choose host
-    home.click_chose_host()
-    logger("Clicked choose host")
-
-    # Upload file
+    # Upload flow
     home.upload_file()
     logger("Uploaded file")
+    step(home.click_upload_next, "Clicked upload next")
 
-    # Click upload next
-    home.click_upload_next()
-    logger("Clicked upload next")
+    for _ in range(2):
+        step(home.click_dox_next, "Clicked dox next")
 
-    # click dox next
-    home.click_dox_next()
-    logger("Clicked dox next")
+    for _ in range(8):
+        step(home.click_pptx_next2, "Clicked agreement next2")
 
-    # click dox next
-    home.click_dox_next()
-    logger("Clicked dox next")
+    # Test form
+    step(home.click_test_option, "Clicked test option")
+    step(home.click_close_image, "Clicked close image")
+    step(home.click_test_submit, "Clicked test submit")
 
-    # click pptx next2
-    home.click_pptx_next2()
-    logger("Clicked agreement next2")
+    step(home.click_test_option_without, "Clicked test option")
+    step(home.click_test_submit, "Clicked test submit")
 
-    # click pptx next2
-    home.click_pptx_next2()
-    logger("Clicked agreement next2")
+    # External links
+    step(home.click_visit_link, "Clicked visit link")
+    step(home.click_visit_link, "Clicked link next")
 
-    # click pptx next2
-    home.click_pptx_next2()
-    logger("Clicked agreement next2")
+    step(home.click_test_option_without, "Clicked test option")
+    step(home.click_test_submit, "Clicked test submit")
 
-     # click pptx next2
-    home.click_pptx_next2()
-    logger("Clicked agreement next2")
+    # Content pages
+    step(home.click_test_submit, "Clicked content next")
+    for _ in range(6):
+        step(home.click_content_next, "Clicked content next")
 
-    # click pptx next2
-    home.click_pptx_next2()
-    logger("Clicked agreement next2")
-
-     # click image1
-    home.click_pptx_next2()
-    logger("Clicked agreement next2")
-
-     # click image2
-    home.click_pptx_next2()
-    logger("Clicked agreement next2")
-
-     # click image3
-    home.click_pptx_next2()
-    logger("Clicked agreement next2")
-
-    # click external next
-    home.click_upload_next()
-    logger("Clicked external next")
-
-    # click external next
-    home.click_upload_next()
-    logger("Clicked external next")
-
-    #click Form option
-    home.click_test_option()    
-    logger("Clicked test option")
-
-    #click close image
-    home.click_close_image()
-    logger("Clicked close image")
-
-    #click Form submit
-    home.click_test_submit()    
-    logger("Clicked test submit")
-
-    #click test option
-    home.click_test_option_without()    
-    logger("Clicked test option")
-
-    #click test submit
-    home.click_test_submit()    
-    logger("Clicked test submit")
-
-     # click Emoti next
-    home.click_upload_next()
-    logger("Clicked external next")
-
-    # click Emoti next
-    home.click_upload_next()
-    logger("Clicked external next")
-
-    #click test option
-    home.click_test_option_without()    
-    logger("Clicked test option")
-
-    #click test submit
-    home.click_test_submit()    
-    logger("Clicked test submit")
-
-    #click Content next
-    home.click_test_submit()    
-    logger("Clicked content next")
-
-    #click content next
-    home.click_content_next()
-    logger("Clicked content next")
-
-    #click content next
-    home.click_content_next()
-    logger("Clicked content next")
-
-    #click content next
-    home.click_content_next()
-    logger("Clicked content next")
-
-    #click content next
-    home.click_content_next()
-    logger("Clicked content next")
-
-    #click content next
-    home.click_content_next()
-    logger("Clicked content next")
-
-    #click content next
-    home.click_content_next()
-    logger("Clicked content next")
-
-    #click Acknowledgment option
-    home.click_test_option_without()    
-    logger("Clicked acknowledgment option")
-
-    #click Acknowledgement submit
-    home.click_test_submit()    
-    logger("Clicked acknowledgment submit")
+    # Acknowledgment
+    step(home.click_test_option_without, "Clicked acknowledgment option")
+    step(home.click_test_submit, "Clicked acknowledgment submit")

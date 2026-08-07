@@ -1,15 +1,15 @@
+import time
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+
 class HomePage:
     """Page object for the Kiosk Home Page, handling visitor check-in flow."""
 
-    # Optional loader locator (update if your app uses one)
     LOADER = (By.CLASS_NAME, "loader")
 
-    # Locators for UI elements
     CHECK_IN_BUTTON = (
         By.XPATH, "/html/body/div[2]/div/div[1]/div/div[1]/div/div[1]/div[2]/div/button[3]")
     CHOSE_WORKFLOW = (
@@ -24,51 +24,48 @@ class HomePage:
         By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/div/div/div[3]/table/tbody/tr[1]/td[2]")
     CHOSE_HOST = (
         By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[1]/div/div[3]/div[2]/div[1]/div[1]/div[2]/div[9]")
-    HOST_INPUT = (
-        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[1]/div/div[3]/div[2]/div[1]/div[1]/div/div/div/div/div/div[1]/div")
-    HOST_NEXT = (
-        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[1]/div/div[3]/div[2]/div[1]/div[3]/div/button[2]")
-    # Default upload locator and file path
     UPLOAD_BUTTON = "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div[1]/div[1]/div[1]/button"
     UPLOAD_FILE_PATH = r"C:\Users\AbdulRafay\Downloads\1380678.jpg"
     UPLOAD_NEXT = (
-        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[2]/div/button")
+        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div[2]/button")
     DOX_NEXT_BUTTON = (
         By.XPATH, "/html/body/div[3]/div[3]/div/div/div/div[2]/div/button")
     PPTX_NEXT2_BUTTON = (
         By.XPATH, "/html/body/div[3]/div[3]/div/div/div/div/div/button")
     TEST_OPTION_BUTTON = (
-        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div/div[1]/div/div/div/div/div[2]/div[1]/div/div/button/div")                   
+        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div/div[1]/div/div/div/div/div[2]/div[1]")
     TEST_OPTION_WITHOUT_BUTTON = (
         By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div/div[1]/div/div/div/div/div[2]/div[1]/div/button")
     CLOSE_IMAGE_BUTTON = (
         By.XPATH, "/html/body/div[3]/div[4]")
     TEST_SUBMIT_BUTTON = (
-        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div/div[2]/div/div/button")  
+        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div/div[2]/div/div/button")
     CONTENT_NEXT_BUTTON = (
-        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div/div[2]/div/div[2]/button") 
-    
+        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[1]/div/div/div[2]/div/div[2]/button")
+    VISIT_LINK_BUTTON = (
+        By.XPATH, "/html/body/div[2]/div/div[1]/div[2]/div[2]/div/div[3]/div[2]/div[2]/div/button")
+
     def __init__(self, driver, logger=None):
-        """Initialize the HomePage with driver and optional logger."""
         self.driver = driver
-        self.wait = WebDriverWait(driver, 100, poll_frequency=3)  # Retry every 3 seconds
+        self.wait = WebDriverWait(driver, 100, poll_frequency=3)
         self.logger = logger
 
     def _log(self, message):
-        """Log a message if logger is provided."""
         if self.logger:
             self.logger(message)
+
+    def _click(self, locator, message):
+        self.wait.until(EC.element_to_be_clickable(locator)).click()
+        self._log(message)
 
     def wait_for_api(self, timeout=100):
         """Wait for page to load and API calls to complete."""
         try:
-            # Wait for DOM ready
             WebDriverWait(self.driver, timeout).until(
                 lambda d: d.execute_script("return document.readyState") == "complete"
             )
-            # Wait for loader to disappear if present
             try:
-                WebDriverWait(self.driver, 100).until(
+                WebDriverWait(self.driver, timeout).until(
                     EC.invisibility_of_element_located(self.LOADER)
                 )
             except TimeoutException:
@@ -79,71 +76,49 @@ class HomePage:
             raise
 
     def open(self):
-        """Open the home page URL."""
         self.driver.get("https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/home")
         self._log("Opened home page")
 
     def home_url(self):
-        """Return the expected home URL."""
         return "https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/home"
 
     def click_check_in(self):
-        """Click the Check In button."""
-        self.wait.until(EC.element_to_be_clickable(self.CHECK_IN_BUTTON)).click()
-        self._log("Clicked Check In button")
+        self._click(self.CHECK_IN_BUTTON, "Clicked Check In button")
 
     def visitor_type_url(self):
-        """Return the expected visitor type URL."""
         return "https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/visitor-type"
 
     def click_chose_workflow(self):
-        """Click the chose workflow option."""
-        self.wait.until(EC.element_to_be_clickable(self.CHOSE_WORKFLOW)).click()
-        self._log("Chose workflow clicked")
+        self._click(self.CHOSE_WORKFLOW, "Chose workflow clicked")
 
     def num_people_url(self):
-        """Return the expected num people URL."""
         return "https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/num-people"
 
     def click_next_multiparty(self):
-        """Click the next button for multiparty."""
-        self.wait.until(EC.element_to_be_clickable(self.NEXT_MULTIPARTY)).click()
-        self._log("Next button clicked")
+        self._click(self.NEXT_MULTIPARTY, "Next button clicked")
 
     def visitor_info_url(self):
-        """Return the expected visitor info URL."""
         return "https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/visitor-info"
 
     def phone_input(self):
-        """Enter phone number."""
         self.wait.until(EC.element_to_be_clickable(self.PHONE_INPUT)).send_keys("3021843163")
         self._log("Phone number entered")
 
     def click_phone_next(self):
-        """Click the next button after phone input."""
         self.wait.until(EC.element_to_be_clickable(self.PHONE_Next)).click()
         self.wait_for_api()
         self._log("Phone Next button clicked")
 
     def chose_profile(self):
-        """Choose the first profile."""
         self.wait.until(EC.element_to_be_clickable(self.CHOSE_PROFILE)).click()
         self.wait_for_api()
         self._log("Clicked on Profile")
 
     def chose_host_url(self):
-        """Return the expected choose host URL."""
         return "https://app.undesked.com/kiosk/1a3f9f5c-753f-4344-a7d9-8269e0001d14/choose-host"
 
     def click_chose_host(self):
-        """Click the chose host option."""
-        self.wait.until(EC.element_to_be_clickable(self.CHOSE_HOST)).click()
-        self._log("Clicked on Search Host icon")
-
-    def click_host_next(self):
-        """Click the next button after choosing host."""
-        self.wait.until(EC.element_to_be_clickable(self.HOST_NEXT)).click()
-        self._log("Clicked on Host Next")
+        self._click(self.CHOSE_HOST, "Clicked on Search Host icon")
 
     def upload_file(self, upload_xpath: str = None, file_path: str = None, timeout: int = 30):
         """Upload a file using the provided xpath/button.
@@ -156,67 +131,49 @@ class HomePage:
         Note: Selenium cannot interact with native OS file dialogs. Sending
         a path to an `input[type=file]` avoids opening the OS dialog.
         """
-        # Use provided values or fall back to class defaults
         upload_xpath = upload_xpath or getattr(self, 'UPLOAD_BUTTON', None)
         file_path = file_path or getattr(self, 'UPLOAD_FILE_PATH', None)
         if not upload_xpath or not file_path:
             raise ValueError('upload_xpath and file_path must be provided either as args or set on the page object')
 
         locator = (By.XPATH, upload_xpath)
-        el = WebDriverWait(self.driver, timeout).until(
-            EC.presence_of_element_located(locator)
-        )
+        el = WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(locator))
 
         try:
-            tag = el.tag_name.lower()
+            is_file_input = el.tag_name.lower() == 'input' and (el.get_attribute('type') or '').lower() == 'file'
         except Exception:
-            tag = ''
+            is_file_input = False
 
-        input_type = (el.get_attribute('type') or '').lower()
+        if is_file_input:
+            return self._finish_upload(el, file_path, "direct input")
 
-        # If the element itself is a file input, send the file path directly
-        if tag == 'input' and input_type == 'file':
-            el.send_keys(file_path)
-            self._log(f"Uploaded file: {file_path}")
-            return
-
-        # First, try to find any input[type=file] on the page without clicking
+        # Try an input[type=file] already present on the page without clicking
         try:
-            file_input = WebDriverWait(self.driver, 5).until(  # Short wait
+            file_input = WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@type='file']"))
             )
-            file_input.send_keys(file_path)
-            self._log(f"Uploaded file via existing input: {file_path}")
-            return
+            return self._finish_upload(file_input, file_path, "existing input")
         except Exception:
-            pass  # No input found, proceed to click
+            pass
 
-        # Otherwise attempt to click the provided element to reveal the file input
+        # Click the provided element to reveal a hidden file input
         try:
             el.click()
         except Exception:
-            try:
-                self.driver.execute_script("arguments[0].click();", el)
-            except Exception:
-                pass
+            self.driver.execute_script("arguments[0].click();", el)
 
-        # Now try to find any input[type=file] in DOM after click
         try:
             file_input = WebDriverWait(self.driver, timeout).until(
                 EC.presence_of_element_located((By.XPATH, "//input[@type='file']"))
             )
-            file_input.send_keys(file_path)
-            self._log(f"Uploaded file via discovered input: {file_path}")
-            return
+            return self._finish_upload(file_input, file_path, "discovered input")
         except Exception:
             pass
 
-        # Try nested input under the clicked element as a last resort
+        # Last resort: an input nested under the clicked element
         try:
             nested = el.find_element(By.XPATH, ".//input[@type='file']")
-            nested.send_keys(file_path)
-            self._log(f"Uploaded file via nested input: {file_path}")
-            return
+            return self._finish_upload(nested, file_path, "nested input")
         except Exception:
             pass
 
@@ -225,42 +182,63 @@ class HomePage:
             "If your UI uses a native file dialog, locate a hidden file input and pass its xpath."
         )
 
+    def _finish_upload(self, file_input, file_path, source):
+        file_input.send_keys(file_path)
+        self.wait_for_api()
+        self._log(f"Uploaded file via {source}: {file_path}")
+
+    def close_new_tab(self, wait_seconds: int = 4):
+        """If clicking a link opened a new browser tab/window, keep it open briefly then close it and return focus to the main window."""
+        main_handle = self.driver.current_window_handle
+        try:
+            WebDriverWait(self.driver, 10).until(lambda d: len(d.window_handles) > 1)
+        except TimeoutException:
+            self._log("No new window/tab appeared")
+            return
+
+        time.sleep(wait_seconds)
+
+        for handle in self.driver.window_handles:
+            if handle != main_handle:
+                self.driver.switch_to.window(handle)
+                self.driver.close()
+
+        self.driver.switch_to.window(main_handle)
+        self._log("Closed new window/tab and switched back")
+
     def click_upload_next(self):
-        """Click the next button after upload."""
-        self.wait.until(EC.element_to_be_clickable(self.UPLOAD_NEXT)).click()
-        self._log("Clicked on Upload Next")
+        """Click the next button after upload, retrying if the click doesn't register."""
+        for attempt in range(3):
+            button = self.wait.until(EC.element_to_be_clickable(self.UPLOAD_NEXT))
+            button.click()
+            try:
+                WebDriverWait(self.driver, 5).until(EC.staleness_of(button))
+                self._log("Clicked on Upload Next")
+                return
+            except TimeoutException:
+                self._log(f"Upload Next click did not register, retrying (attempt {attempt + 1})")
+        raise TimeoutException("Upload Next button click did not take effect after 3 attempts")
 
     def click_dox_next(self):
-        """Click the next button on dox page."""
-        self.wait.until(EC.element_to_be_clickable(self.DOX_NEXT_BUTTON)).click()
-        self._log("Clicked on Dox Next Button")
+        self._click(self.DOX_NEXT_BUTTON, "Clicked on Dox Next Button")
 
     def click_pptx_next2(self):
-        """Click the next button on pptx page."""
-        self.wait.until(EC.element_to_be_clickable(self.PPTX_NEXT2_BUTTON)).click()
-        self._log("Clicked on PPTX Next2 Button")
+        self._click(self.PPTX_NEXT2_BUTTON, "Clicked on PPTX Next2 Button")
 
     def click_test_option(self):
-        """Click the test option button."""
-        self.wait.until(EC.element_to_be_clickable(self.TEST_OPTION_BUTTON)).click()
-        self._log("Clicked on Test Option Button")
+        self._click(self.TEST_OPTION_BUTTON, "Clicked on Test Option Button")
 
     def click_test_option_without(self):
-        """Click the test option without button."""
-        self.wait.until(EC.element_to_be_clickable(self.TEST_OPTION_WITHOUT_BUTTON)).click()
-        self._log("Clicked on Test Option Without Button")    
+        self._click(self.TEST_OPTION_WITHOUT_BUTTON, "Clicked on Test Option Without Button")
 
     def click_close_image(self):
-        """Click the close image button."""
-        self.wait.until(EC.element_to_be_clickable(self.CLOSE_IMAGE_BUTTON)).click()
-        self._log("Clicked on Close Image Button")
+        self._click(self.CLOSE_IMAGE_BUTTON, "Clicked on Close Image Button")
 
     def click_test_submit(self):
-        """Click the test submit button."""
-        self.wait.until(EC.element_to_be_clickable(self.TEST_SUBMIT_BUTTON)).click()
-        self._log("Clicked on Test Submit Button")    
+        self._click(self.TEST_SUBMIT_BUTTON, "Clicked on Test Submit Button")
 
     def click_content_next(self):
-        """Click the content next button."""
-        self.wait.until(EC.element_to_be_clickable(self.CONTENT_NEXT_BUTTON)).click()
-        self._log("Clicked on Content Next Button")
+        self._click(self.CONTENT_NEXT_BUTTON, "Clicked on Content Next Button")
+
+    def click_visit_link(self):
+        self._click(self.VISIT_LINK_BUTTON, "Clicked on Visit Link Button")

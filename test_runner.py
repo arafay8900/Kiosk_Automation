@@ -11,6 +11,20 @@ import subprocess
 import os
 import shutil
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
+REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+
+def resolve_python_executable():
+    """Use local repo virtualenv Python, fallback to current interpreter."""
+    local_venv_python = os.path.join(REPO_ROOT, ".venv", "Scripts", "python.exe")
+    if os.path.exists(local_venv_python):
+        return local_venv_python
+    return sys.executable
+
 def cleanup_reports():
     """Clean previous test reports and data."""
     print("🧹 Cleaning previous reports...")
@@ -53,17 +67,35 @@ def serve_allure_report():
 
 def run_test(browser_filter=None):
     """Run tests with optional browser filter."""
-    venv_python = r'C:\Users\AbdulRafay\PycharmProjects\KioskAutomation\.venv\Scripts\python.exe'
+    venv_python = resolve_python_executable()
 
     if browser_filter:
-        cmd = f'"{venv_python}" -m pytest --alluredir=reports/allure tests/ -k "{browser_filter}" -v'
+        cmd = [
+            venv_python,
+            "-m",
+            "pytest",
+            "--alluredir=reports/allure",
+            "tests/",
+            "-k",
+            browser_filter,
+            "-v",
+        ]
     else:
-        cmd = f'"{venv_python}" -m pytest --alluredir=reports/allure tests/ -v'
+        cmd = [
+            venv_python,
+            "-m",
+            "pytest",
+            "--alluredir=reports/allure",
+            "tests/",
+            "-v",
+        ]
 
-    print(f"🚀 Running: {cmd}")
-    return subprocess.call(cmd, shell=True)
+    print(f"🚀 Running: {' '.join(cmd)}")
+    return subprocess.call(cmd)
 
 def main():
+    os.chdir(REPO_ROOT)
+
     if len(sys.argv) != 2:
         print("Kiosk Automation Test Runner")
         print("Usage: python test_runner.py [chrome|firefox|edge|all]")
