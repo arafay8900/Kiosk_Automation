@@ -3,12 +3,6 @@ import os
 import base64
 import pytest
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from selenium.webdriver.edge.service import Service as EdgeService
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.firefox import GeckoDriverManager
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
 from pytest_html import extras
 import allure
 import cv2
@@ -35,14 +29,15 @@ def browser(request):
 @pytest.fixture
 def driver(browser):
     """Fixture to create WebDriver instance based on browser parameter."""
+    # Selenium Manager (built into Selenium 4.6+) resolves and downloads the
+    # driver matching whatever browser version is installed, no separate
+    # webdriver-manager dependency or pinned driver binaries to go stale.
     if browser == "chrome":
-        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+        driver = webdriver.Chrome()
     elif browser == "firefox":
-        driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
+        driver = webdriver.Firefox()
     elif browser == "edge":
-        # Auto-download the driver matching the installed Edge version; a
-        # pinned local binary drifts out of sync with Edge's auto-updates.
-        driver = webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()))
+        driver = webdriver.Edge()
 
     driver.maximize_window()
     yield driver

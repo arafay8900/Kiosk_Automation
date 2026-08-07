@@ -8,16 +8,19 @@ on:
 
 jobs:
   selenium-tests:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+
+    - name: Install Xvfb
+      run: sudo apt-get update && sudo apt-get install -y xvfb
 
     - name: Install dependencies
       run: |
@@ -26,11 +29,10 @@ jobs:
         pip install pytest-html  # ensure this is installed
 
     - name: Create reports directory
-      run: mkdir reports
+      run: mkdir -p reports
 
     - name: Run Selenium Tests
-      run: |
-        pytest --html=reports/report.html --self-contained-html -v
+      run: xvfb-run -a pytest --html=reports/report.html --self-contained-html -v
 
     - name: Upload Test Report
       uses: actions/upload-artifact@v4
