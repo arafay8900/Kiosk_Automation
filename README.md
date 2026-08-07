@@ -2,6 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![Selenium](https://img.shields.io/badge/Selenium-4.39.0-green.svg)](https://www.selenium.dev/)
+[![Build](https://github.com/arafay8900/Kiosk_Automation/actions/workflows/selenium-tests.yml/badge.svg)](https://github.com/arafay8900/Kiosk_Automation/actions/workflows/selenium-tests.yml)
 
 Multi-browser automated testing for visitor check-in kiosk systems using Selenium WebDriver.
 
@@ -117,11 +118,13 @@ source .venv/bin/activate # macOS/Linux
 
 ## 📈 CI/CD
 
+Runs on GitHub Actions (`.github/workflows/selenium-tests.yml`) on every push/PR to `main`, on `ubuntu-latest` under Xvfb (the suite launches real, non-headless browser windows for screen recording, so it needs an actual display surface):
+
 ```yaml
-- name: Run tests
-  run: python test_runner.py all
-- name: Generate reports
-  run: allure generate reports/allure --clean
+- name: Install Xvfb
+  run: sudo apt-get update && sudo apt-get install -y xvfb
+- name: Run Selenium Tests
+  run: xvfb-run -a pytest --html=reports/report.html --self-contained-html -v
 ```
 
 ## 🤝 Contributing
